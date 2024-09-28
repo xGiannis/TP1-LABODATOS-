@@ -5,10 +5,14 @@ Created on Fri Sep 20 11:33:24 2024
 
 @author: Estudiante
 """
-
+#%%
 # Importamos bibliotecas
 import pandas as pd
 from inline_sql import sql, sql_val
+
+#C:\Users\usuario\Desktop\TP1-LABODATOS-\TP LABO\lista-sedes-basicos.csv
+
+miprefijo="C:/Users/usuario/Desktop/TP1-LABODATOS-/TP LABO/"
 
 archivo_completo=  "lista-sedes-completos.csv"
 
@@ -18,19 +22,19 @@ archivo_secciones= "lista-secciones.csv"
 
 archivo_migraciones = "datos_migraciones.csv"
 
-datos_basicos= pd.read_csv("lista-sedes-basicos.csv")
+datos_basicos= pd.read_csv(miprefijo+archivo_basico)
 
-datos_secciones = pd.read_csv(archivo_secciones)
+datos_secciones = pd.read_csv(miprefijo+archivo_secciones)
 
-datos_completos= pd.read_csv(archivo_completo)
+datos_completos= pd.read_csv(miprefijo+archivo_completo, on_bad_lines='skip')
 
-datos_migraciones = pd.read_csv(archivo_migraciones)
+datos_migraciones = pd.read_csv(miprefijo+archivo_migraciones)
 
 #%%
 
 #Armado de las tablas del Modelo Relacional:
 
-#PAIS:
+# ######################PAIS##################:
 
 #Primero saco todos los valores que no se pueden convertir a decimal de la columna 2000
 consulta_sql2 = """
@@ -88,7 +92,7 @@ consulta_sql = """
                 GROUP BY "Country Dest Code";
                """
                
-inmigraciones00 = sql^consulta_sql
+inmigraciones00ARG = sql^consulta_sql
 
 consulta_sql = """
                 SELECT DISTINCT i.codigo, (i.inmigraciones00ARG + e.emigraciones00ARG) AS flujo_ARG
@@ -122,3 +126,104 @@ consulta_sql = """
                """
 
 Pais = sql^consulta_sql
+# %%
+
+# ######################SEDES##################:
+
+#Los atributos son sede_id y region geografica. 
+
+consulta_sql = """
+                SELECT DISTINCT sede_id, region_geografica, pais_iso_3
+                FROM datos_completos
+               """
+
+sedes_regiones = sql^consulta_sql
+
+
+
+# %%
+# ############REDES SOCIALES ##################:
+
+#Los atributos son url. 
+
+consulta_sql = """
+                SELECT DISTINCT redes_sociales, sede_id
+                FROM datos_completos
+               """
+
+redes_sociales = sql^consulta_sql
+
+
+#vamos a splittear las redes sociales por url
+a=redes_sociales["redes_sociales"]
+b=a[2]
+
+def splitRedes(df):
+    listadelistaurls:list=[] #contiene listas de listas, algunas listas de un solo elemento y otras vacias (supongo the later)
+    redes = df["redes_sociales"]
+    for i in range(len(redes)):
+        urls = redes[i]
+        listaurl=[]
+        if urls != None:
+            listaurl=urls.split(' //')
+            listaurl.pop()  ##TODAS LAS LISTAS terminan con //, asi que saco el ultimo elemento a todas dif de null (si no, siempre qeudaba un ultimo vacio).
+        listadelistaurls.append(listaurl)
+    return listadelistaurls
+ 
+
+redes_urls_separados=splitRedes(redes_sociales)
+
+def matcheoListaSede(df,listadelistas):
+    #matchea cada lista con una sede, y las hace dfs
+    
+    u1=[]
+    s1=[]
+    
+    d={"sede_id":s1,"url":u1}
+    
+    sedes_id=df["sedes_id"]
+    
+    for i in range(len(listadelistas)):
+        
+        urls = listadelistas[i]
+        id= sedes_id[i]
+        
+        
+        
+        for j in range(len(urls)):
+        #tal vez no necesito este for!! me tengo q ir al cumple!
+            
+        
+        
+    
+    
+
+
+
+
+
+
+
+
+# %%
+
+
+
+# %%
+# ############SECCIONES ##################:
+
+#Los atributos descripcion de la sede en castellano. 
+
+consulta_sql = """
+                SELECT DISTINCT sede_desc_castellano
+                FROM datos_completos
+               """
+
+desc_sede = sql^consulta_sql
+ 
+
+
+
+
+
+
