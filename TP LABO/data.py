@@ -10,9 +10,13 @@ Created on Fri Sep 20 11:33:24 2024
 import pandas as pd
 from inline_sql import sql, sql_val
 
-#C:\Users\usuario\Desktop\TP1-LABODATOS-\TP LABO\lista-sedes-basicos.csv
 
-miprefijo="C:/Users/usuario/Desktop/TP1-LABODATOS-/TP LABO/"
+#C:\Users\usuario\Desktop\TP1-LABODATOS-\TP LABO\lista-sedes-basicos.csv
+#gian:
+#miprefijo="C:/Users/usuario/Desktop/TP1-LABODATOS-/TP LABO/" 
+
+#seba:
+miprefijo = "C:\\Users\\Sebastián\\Documents\\LaboDeDatos\\TP1\\" 
 
 archivo_completo=  "lista-sedes-completos.csv"
 
@@ -133,11 +137,11 @@ Pais = sql^consulta_sql
 #Los atributos son sede_id y region geografica. 
 
 consulta_sql = """
-                SELECT DISTINCT sede_id, region_geografica, pais_iso_3
+                SELECT DISTINCT sede_id, pais_castellano AS nombre_pais
                 FROM datos_completos
                """
 
-sedes_regiones = sql^consulta_sql
+sedes = sql^consulta_sql
 
 
 
@@ -245,12 +249,84 @@ redes_sociales = sql^consulta_sql
 #Los atributos descripcion de la sede en castellano. 
 
 consulta_sql = """
-                SELECT DISTINCT sede_desc_castellano
-                FROM datos_completos
+                SELECT DISTINCT sede_id, sede_desc_castellano
+                FROM datos_secciones;
                """
 
-desc_sede = sql^consulta_sql
- 
+secciones = sql^consulta_sql
+
+
+#%%
+
+##########EJERCICIO H#########
+
+#i)
+
+#Primero hago una tabla de paises con la cantidad de sedes
+consulta_sql = """
+                SELECT DISTINCT nombre_pais, COUNT(nombre_pais) AS cant_sedes
+                FROM sedes
+                GROUP BY nombre_pais
+                ORDER BY nombre_pais;
+               """
+
+cantidad_sedes = sql^consulta_sql
+
+
+
+#Ahora una tabla de sedes con la cantidad de secciones (ademas guardo el pais de la sede)
+consulta_sql = """
+                SELECT DISTINCT s1.nombre_pais, s1.sede_id, s2.cant_secciones
+                FROM sedes AS s1
+                LEFT JOIN (SELECT DISTINCT sede_id, COUNT(sede_id) AS cant_secciones
+                      FROM secciones
+                      GROUP BY sede_id) AS s2
+                ON s1.sede_id = s2.sede_id
+                ORDER BY s1.nombre_pais;
+               """
+               
+cant_seccionesXsede = sql^consulta_sql
+
+#hay sedes que no tienen secciones, eso me esta cagando todo
+
+consulta_sql = """
+                SELECT DISTINCT nombre_pais, sede_id, COALESCE(cant_secciones, 0) AS cant_secciones
+                FROM cant_seccionesXsede
+                ORDER BY nombre_pais;
+               """
+
+cant_seccionesXsede2 = sql^consulta_sql
+
+#use ese comando para reemplazar los nulls por 0, nose porq no funciona replace.
+
+#Ahora saco el promedio de secciones por sede.
+consulta_sql = """
+                SELECT DISTINCT nombre_pais, AVG(cant_secciones) AS secciones_promedio
+                FROM cant_seccionesXsede2
+                GROUP BY nombre_pais
+                ORDER BY nombre_pais;
+               """
+
+avg_secciones = sql^consulta_sql
+
+
+#Finalmente los joins de las tablas que hice para obtener el resultado.
+
+consulta_sql = """
+                SELECT DISTINCT cs.nombre_pais, cs.cant_sedes, a.secciones_promedio, p.flujo_mundo
+                FROM cantidad_sedes AS cs
+                INNER JOIN avg_secciones AS a
+                ON cs.nombre_pais = a.nombre_pais
+                LEFT JOIN Pais AS p
+                ON cs.nombre_pais = p.nombre_pais
+                ORDER BY cs.nombre_pais;
+               """
+
+resultado = sql^consulta_sql
+
+#hay algo raro que es que cuando hago el inner join con pais pierdo 3 paises, osea
+#hay 3 paises que no tienen datos en la tabla de migraciones que nos dieron, un ejemplo es
+#serbia. 
 
 
 
