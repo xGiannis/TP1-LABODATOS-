@@ -181,21 +181,30 @@ def matcheoListaSede(df,listadelistas):
     
     d={"sede_id":s1,"url":u1}
     
-    sedes_id=df["sedes_id"]
+    res = pd.DataFrame(data=d)
+    
+    sedes_id=df["sede_id"]
     
     for i in range(len(listadelistas)):
         
         urls = listadelistas[i]
         id= sedes_id[i]
         
-        
-        
+        repeticionId=[]
         for j in range(len(urls)):
+            repeticionId.append(id)
+        
         #tal vez no necesito este for!! me tengo q ir al cumple!
             
+        datosede = {"sede_id":repeticionId,"url":urls}
+        dfsede=pd.DataFrame(data=datosede)
+        
+        res.concat(dfsede)
+    return res
         
         
-    
+        
+matcheoListaSede(redes_sociales, redes_urls_separados)
     
 
 
