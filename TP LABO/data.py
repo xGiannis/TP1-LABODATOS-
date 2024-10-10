@@ -9,14 +9,17 @@ Created on Fri Sep 20 11:33:24 2024
 # Importamos bibliotecas
 import pandas as pd
 from inline_sql import sql, sql_val
-
+import numpy as np
+import matplotlib.pyplot as plt # Para graficar series multiples
+from   matplotlib import ticker   # Para agregar separador de miles
+import seaborn as sns           # Para graficar histograma
 
 #C:\Users\usuario\Desktop\TP1-LABODATOS-\TP LABO\lista-sedes-basicos.csv
 #gian:
-#miprefijo="C:/Users/usuario/Desktop/TP1-LABODATOS-/TP LABO/" 
+miprefijo="C:/Users/usuario/Desktop/TP1-LABODATOS-/TP LABO/" 
 
 #seba:
-miprefijo = "C:\\Users\\Sebastián\\Documents\\LaboDeDatos\\TP1\\" 
+#miprefijo = "C:\\Users\\Sebastián\\Documents\\LaboDeDatos\\TP1\\" 
 
 archivo_completo=  "lista-sedes-completos.csv"
 
@@ -377,3 +380,86 @@ consulta_sql = """
                """
                
 cantRedesPais = sql^consulta_sql
+
+#%%
+#iv)
+consulta_sql="""
+SELECT *
+FROM redes_sociales as r 
+INNER JOIN sedes as s
+ON s.sede_id = r.sede_id
+"""
+
+redes_paises = sql^consulta_sql
+
+consulta_sql = """
+                SELECT DISTINCT  nombre_pais as Pais,sede_id as Sede, 
+                                CASE 
+                                    WHEN redes_sociales LIKE '%facebook%' THEN 'Facebook'
+                                    WHEN redes_sociales LIKE '%instagram%' THEN 'Instagram'
+                                    WHEN redes_sociales LIKE '%twitter%' THEN 'Twitter'
+                                    WHEN redes_sociales LIKE '%linkedin%' THEN 'Linkedin'
+                                    WHEN redes_sociales LIKE '%flickr%' THEN 'Flickr'
+                                    WHEN redes_sociales LIKE '%youtube%' THEN 'Youtube'
+                                    WHEN redes_sociales LIKE '%gmail%' THEN 'Gmail'
+                                    ELSE 'desconocida'
+                                END AS red_social,
+                                redes_sociales as URL
+                FROM redes_paises
+                ORDER BY nombre_pais ASC;
+               """
+
+
+redesxpaisurl=sql^consulta_sql
+
+
+#%% 
+
+#!!!!!!!!!!!!!!!!!!!VISUALIZACION!!!!!!!!!!!!!!!!!!!!!!!!
+
+#i)
+
+
+#i)
+#cntd sdes por region geografica:
+    
+sedesxregion=sql^"""
+SELECT SUM(cs.cant_sedes) as cant_sedes, region_geografica
+FROM cantidad_sedes as cs
+INNER JOIN info_pais as ip
+ON cs.nombre_pais = ip.nombre_pais
+GROUP BY region_geografica
+ORDER BY cant_sedes
+"""
+
+
+#%%
+fig, ax = plt.subplots()
+
+plt.rcParams['font.family'] = 'sans-serif'           
+
+
+sns.barplot(data=sedesxregion, x='region_geografica', y='cant_sedes',palette="colorblind",
+            legend='full',errorbar=None,edgecolor="black",linewidth=2.5)
+
+
+
+ax.set_title('Sedes x Region Geografica')
+ax.set_xlabel('Región', fontsize='medium')                       
+ax.set_ylabel('Cantidad', fontsize='medium')    
+#ax.set_xlim(0, 11)
+#ax.set_ylim(0, 250)
+plt.xticks(rotation=90)
+plt.grid(True,linestyle="--",linewidth=0.5)
+##ax.set_xticks(range(1,11,1))               # Muestra todos los ticks del eje x
+#ax.set_yticks([])                          # Remueve los ticks del eje y
+#ax.bar_label(ax.containers[0], fontsize=8)   # Agrega la etiqueta a cada barra
+
+
+
+
+
+
+
+
+
