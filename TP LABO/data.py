@@ -41,13 +41,16 @@ datos_migraciones = pd.read_csv(miprefijo+archivo_migraciones)
 # ######################PAIS##################:
 
 #Primero saco todos los valores que no se pueden convertir a decimal de la columna 2000
-consulta_sql2 = """
-                 SELECT * 
-                 FROM datos_migraciones
-                 WHERE TRY_CAST("2000 [2000]" AS DECIMAL) IS NOT NULL;
-                """
 
-datos_migraciones2 = sql^consulta_sql2
+consulta_sql20 = """
+                  SELECT "Country Origin Name", "Country Origin Code",
+                         "Migration by Gender Name", "Migration by Gender Code",
+                         "Country Dest Name", "Country Dest Code", "1960 [1960]", "1970 [1970]",
+                         "1980 [1980]", "1990 [1990]", REPLACE ("2000 [2000]", '..', '0') AS "2000 [2000]"
+                  FROM datos_migraciones;
+                 """
+
+datos_migraciones2 = sql^consulta_sql20
 
 #Tomo las inmigraciones y las emigraciones y sumo.
     
@@ -70,7 +73,7 @@ inmigraciones00 = sql^consulta_sql
 
 
 consulta_sql = """
-                SELECT DISTINCT i.codigo, (i.inmigraciones00 + e.emigraciones00) AS flujo_mundo
+                SELECT DISTINCT i.codigo, (i.inmigraciones00 - e.emigraciones00) AS flujo_mundo
                 FROM inmigraciones00 AS i
                 INNER JOIN emigraciones00 AS e
                 ON i.codigo = e.codigo;
@@ -99,7 +102,7 @@ consulta_sql = """
 inmigraciones00ARG = sql^consulta_sql
 
 consulta_sql = """
-                SELECT DISTINCT i.codigo, (i.inmigraciones00ARG + e.emigraciones00ARG) AS flujo_ARG
+                SELECT DISTINCT i.codigo, (i.inmigraciones00ARG - e.emigraciones00ARG) AS flujo_ARG
                 FROM inmigraciones00ARG AS i
                 INNER JOIN emigraciones00ARG AS e
                 ON i.codigo = e.codigo;
@@ -239,7 +242,6 @@ redes_sociales = sql^consulta_sql
 
 
 
-# %%
 
 
 
@@ -260,6 +262,7 @@ secciones = sql^consulta_sql
 
 ##########EJERCICIO H#########
 
+#%%
 #i)
 
 #Primero hago una tabla de paises con la cantidad de sedes
@@ -331,5 +334,46 @@ resultado = sql^consulta_sql
 
 
 
+#%%
+#ii)
 
+#%%
+#iii)
 
+consulta_sql = """
+                SELECT DISTINCT  s.nombre_pais, s.sede_id, r.redes_sociales
+                FROM sedes AS s
+                INNER JOIN  redes_sociales AS r
+                ON s.sede_id = r.sede_id
+                ORDER BY s.nombre_pais ASC;
+               """
+
+paisSedesRedes = sql^consulta_sql
+
+consulta_sql = """
+                SELECT DISTINCT  nombre_pais, 
+                                CASE 
+                                    WHEN redes_sociales LIKE '%facebook%' THEN 'facebook'
+                                    WHEN redes_sociales LIKE '%instagram%' THEN 'instagram'
+                                    WHEN redes_sociales LIKE '%twitter%' THEN 'twitter'
+                                    WHEN redes_sociales LIKE '%linkedin%' THEN 'linkedin'
+                                    WHEN redes_sociales LIKE '%flickr%' THEN 'flickr'
+                                    WHEN redes_sociales LIKE '%youtube%' THEN 'youtube'
+                                    WHEN redes_sociales LIKE '%gmail%' THEN 'gmail'
+                                    ELSE 'desconocida'
+                                END AS red_social
+                FROM paisSedesRedes
+                ORDER BY nombre_pais ASC;
+               """
+
+paisesConRedes = sql^consulta_sql
+
+consulta_sql = """
+                SELECT DISTINCT nombre_pais, count(nombre_pais) AS cant_redes
+                FROM paisesConRedes
+                WHERE red_social != 'desconocida'
+                GROUP BY nombre_pais
+                ORDER BY nombre_pais ASC;
+               """
+               
+cantRedesPais = sql^consulta_sql
