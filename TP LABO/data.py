@@ -542,7 +542,40 @@ ax.set_ylabel('Flujo Migratorio')
 plt.xticks(rotation=90)
 plt.grid(True,linestyle="--",linewidth=0.5)
 
+#%%---
+#iii)
 
+consultaSQL = """
+                Select distinct d.pais_iso_3 AS codigo , d.pais_castellano AS País, c.cant_sedes
+                From datos_basicos AS d
+                INNER JOIN cantidad_sedes AS c
+                ON d.pais_castellano = c.nombre_pais
+                """
+codigo_pais_sede = sql^consultaSQL
+
+consultaSQL = """
+                Select c.cant_sedes, m.flujo_ARG
+                From codigo_pais_sede AS c
+                INNER JOIN migraciones00ARG AS m
+                ON c.codigo = m.codigo
+                """
+
+sedes_flujo = sql^consultaSQL
+
+
+plt.scatter(data = sedes_flujo, x='cant_sedes', y='flujo_ARG')
+fig, ax = plt.subplots() 
+plt.rcParams['font.family'] = 'sans-serif'           
+ax.scatter(data = sedes_flujo,  
+            x='cant_sedes', 
+            y='flujo_ARG',
+            s=30,      
+            color='red')
+
+ax.set_title('Flujo migratorio en relación a la cantidad de sedes')
+ax.set_xlabel('Cantidad de sedes', fontsize='medium')          
+ax.set_ylabel('Flujo migratorio ', 
+              fontsize='medium')
 
 
 
