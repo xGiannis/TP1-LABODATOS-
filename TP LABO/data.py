@@ -16,12 +16,14 @@ import seaborn as sns           # Para graficar histograma
 
 #C:\Users\usuario\Desktop\TP1-LABODATOS-\TP LABO\lista-sedes-basicos.csv
 #gian:
-#miprefijo="C:/Users/usuario/Desktop/TP1-LABODATOS-/TP LABO/" 
+miprefijo="C:/Users/usuario/Desktop/TP1-LABODATOS-/TP LABO/" 
 
 #seba:
-miprefijo = "C:\\Users\\Sebastián\\Documents\\LaboDeDatos\\TP1\\" 
+#miprefijo = "C:\\Users\\Sebastián\\Documents\\LaboDeDatos\\TP1\\" 
 
 archivo_completo=  "lista-sedes-completos.csv"
+
+archivo_completo_copia=  "lista-sedes-completos - copia.csv"
 
 archivo_basico = "lista-sedes-basicos.csv"
 
@@ -33,7 +35,7 @@ datos_basicos= pd.read_csv(miprefijo+archivo_basico)
 
 datos_secciones = pd.read_csv(miprefijo+archivo_secciones)
 
-datos_completos= pd.read_csv(miprefijo+archivo_completo, on_bad_lines='skip')
+datos_completos= pd.read_csv(miprefijo+archivo_completo_copia)
 
 datos_migraciones = pd.read_csv(miprefijo+archivo_migraciones)
 
@@ -536,7 +538,7 @@ ax = sns.boxplot(x="region_geografica",
 ax.set_title('Flujo Migratorio Por Región')
 ax.set_xlabel('Región Geográfica')
 ax.set_ylabel('Flujo Migratorio')
- 
+
 plt.xticks(rotation=90)
 plt.grid(True,linestyle="--",linewidth=0.5)
 
