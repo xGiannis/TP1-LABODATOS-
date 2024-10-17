@@ -46,12 +46,7 @@ datos_migraciones = pd.read_csv(miprefijo+archivo_migraciones)
 
 ############PAIS#############:
 
-#Primero saco todos los valores que no se pueden convertir a decimal de la columna 2000
-consulta_sql2 = """
-                 SELECT * 
-                 FROM datos_migraciones
-                 WHERE TRY_CAST("2000 [2000]" AS DECIMAL) IS NOT NULL;
-                """
+#Primero cambio los valores de flujo donde hay '..' por '0'.
                 
 consulta_sql20 = """
                   SELECT "Country Origin Name", "Country Origin Code",
@@ -208,7 +203,7 @@ Pais = sql^consulta_sql
 
 # ######################SEDES##################:
 
-#Los atributos son sede_id y region geografica. 
+#Los atributos son sede_id y nombre_pais. 
 
 consulta_sql = """
                 SELECT DISTINCT sede_id, pais_castellano AS nombre_pais
@@ -286,7 +281,10 @@ matcheoListaSede(redes_sociales, redes_urls_separados)
     
 
 #%%
-#Probando split en dataframe
+###########REDES SOCIALES#################
+#Para armar la tabla de Redes Sociales hay que dividir los valores originales que hay 
+#en datos completos, para cumplir con las formas normales.
+
 
 consulta_sql = """
                 SELECT DISTINCT redes_sociales, sede_id
@@ -311,23 +309,23 @@ redes_sociales = sql^consulta_sql
 
 
 
-
-
-
-
-
 # %%
 # ############SECCIONES ##################:
 
-#Los atributos descripcion de la sede en castellano. 
+#hay que hacer la tabal de secciones y también la tabla de dividida_en
+
+consulta_sql = """
+                SELECT DISTINCT sede_desc_castellano
+                FROM datos_secciones;
+               """
+secciones = sql^consulta_sql
 
 consulta_sql = """
                 SELECT DISTINCT sede_id, sede_desc_castellano
                 FROM datos_secciones;
                """
 
-secciones = sql^consulta_sql
-
+dividida_en = sql^consulta_sql
 
 #%%
 
@@ -353,7 +351,7 @@ consulta_sql = """
                 SELECT DISTINCT s1.nombre_pais, s1.sede_id, s2.cant_secciones
                 FROM sedes AS s1
                 LEFT JOIN (SELECT DISTINCT sede_id, COUNT(sede_id) AS cant_secciones
-                      FROM secciones
+                      FROM dividida_en
                       GROUP BY sede_id) AS s2
                 ON s1.sede_id = s2.sede_id
                 ORDER BY s1.nombre_pais;
@@ -410,7 +408,7 @@ resultado = sql^consulta_sql
 #%%
 #ii)
 consultaSQL = """
-                Select distinct region_geografica, AVG(flujo_ARG) as flujo_promedio 
+                Select distinct region_geografica, AVG(flujo_ARG) as flujo_promedio_arg 
                 From Pais
                 Group by region_geografica
                 """
@@ -423,11 +421,11 @@ paisesConSedes = sql^"""
                 """
                 
 consulta_sql = """
-                SELECT r.region_geografica, p.paises_con_sedes, r.flujo_promedio
+                SELECT r.region_geografica, p.paises_con_sedes, r.flujo_promedio_arg 
                 FROM regionYflujo AS r
                 INNER JOIN paisesConSedes AS p
                 ON r.region_geografica = p.region_geografica
-                ORDER BY r.flujo_promedio DESC;
+                ORDER BY r.flujo_promedio_arg DESC;
                """
 
 flujoPorRegionYSedes = sql^consulta_sql
