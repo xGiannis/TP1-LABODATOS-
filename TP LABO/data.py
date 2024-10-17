@@ -408,6 +408,7 @@ resultado = sql^consulta_sql
 #%%
 #ii)
 
+
 #%%
 #iii)
 
@@ -499,6 +500,16 @@ ON cs.nombre_pais = ip.nombre_pais
 GROUP BY region_geografica
 ORDER BY cant_sedes
 """
+#replico esto solo usando usando las entidades
+sedesxregionbien=sql^"""
+SELECT COUNT(s.nombre_pais) as cant_sedes, region_geografica
+FROM sedes as s
+INNER JOIN Pais as ip
+ON s.nombre_pais = ip.nombre_pais
+GROUP BY region_geografica
+ORDER BY cant_sedes
+"""
+
 
 
 #%%
@@ -542,9 +553,8 @@ ax.set_ylabel('Flujo Migratorio')
 plt.xticks(rotation=90)
 plt.grid(True,linestyle="--",linewidth=0.5)
 
-#%%---
-#iii)
 
+#%%
 consultaSQL = """
                 Select distinct d.pais_iso_3 AS codigo , d.pais_castellano AS País, c.cant_sedes
                 From datos_basicos AS d
@@ -576,9 +586,4 @@ ax.set_title('Flujo migratorio en relación a la cantidad de sedes')
 ax.set_xlabel('Cantidad de sedes', fontsize='medium')          
 ax.set_ylabel('Flujo migratorio ', 
               fontsize='medium')
-
-
-
-
-
 
