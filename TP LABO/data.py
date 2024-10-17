@@ -16,10 +16,10 @@ import seaborn as sns           # Para graficar histograma
 
 #C:\Users\usuario\Desktop\TP1-LABODATOS-\TP LABO\lista-sedes-basicos.csv
 #gian:
-miprefijo="C:/Users/usuario/Desktop/TP1-LABODATOS-/TP LABO/" 
+#miprefijo="C:/Users/usuario/Desktop/TP1-LABODATOS-/TP LABO/" 
 
 #seba:
-#miprefijo = "C:\\Users\\Sebastián\\Documents\\LaboDeDatos\\TP1\\" 
+miprefijo = "C:\\Users\\Sebastián\\Desktop\\TP1-LABODATOS-\\TP LABO\\" 
 
 archivo_completo=  "lista-sedes-completos.csv"
 
@@ -409,7 +409,28 @@ resultado = sql^consulta_sql
 
 #%%
 #ii)
+consultaSQL = """
+                Select distinct region_geografica, AVG(flujo_ARG) as flujo_promedio 
+                From Pais
+                Group by region_geografica
+                """
+regionYflujo = sql^consultaSQL
 
+paisesConSedes = sql^"""
+                Select distinct region_geografica, COUNT(nombre_pais) AS paises_con_sedes
+                From Pais
+                Group by region_geografica;
+                """
+                
+consulta_sql = """
+                SELECT r.region_geografica, p.paises_con_sedes, r.flujo_promedio
+                FROM regionYflujo AS r
+                INNER JOIN paisesConSedes AS p
+                ON r.region_geografica = p.region_geografica
+                ORDER BY r.flujo_promedio DESC;
+               """
+
+flujoPorRegionYSedes = sql^consulta_sql
 
 #%%
 #iii)
