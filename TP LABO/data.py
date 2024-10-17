@@ -393,10 +393,12 @@ consulta_sql = """
                 ON cs.nombre_pais = a.nombre_pais
                 LEFT JOIN Pais AS p
                 ON cs.nombre_pais = p.nombre_pais
-                ORDER BY cs.nombre_pais;
+                ORDER BY cant_sedes DESC, cs.nombre_pais;
                """
 
 resultado = sql^consulta_sql
+
+
 
 #hay algo raro que es que cuando hago el inner join con pais pierdo 3 paises, osea
 #hay 3 paises que no tienen datos en la tabla de migraciones que nos dieron, un ejemplo es
@@ -587,3 +589,11 @@ ax.set_xlabel('Cantidad de sedes', fontsize='medium')
 ax.set_ylabel('Flujo migratorio ', 
               fontsize='medium')
 
+#%%
+
+#ACA PONEMOS CODIGO PARA UTILIZAR EN EL INFORME
+
+
+resultadoAbreviadoHi=resultado.head()
+
+resultadoAbreviadoHii= cantRedesPais.iloc[0:6]
