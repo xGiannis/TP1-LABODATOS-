@@ -578,19 +578,12 @@ plt.grid(True,linestyle="--",linewidth=0.5)
 
 
 #%%
-consultaSQL = """
-                Select distinct d.pais_iso_3 AS codigo , d.pais_castellano AS País, c.cant_sedes
-                From datos_basicos AS d
-                INNER JOIN cantidad_sedes AS c
-                ON d.pais_castellano = c.nombre_pais
-                """
-codigo_pais_sede = sql^consultaSQL
-
+#iii)
 consultaSQL = """
                 Select c.cant_sedes, m.flujo_ARG
-                From codigo_pais_sede AS c
-                INNER JOIN migraciones00ARG AS m
-                ON c.codigo = m.codigo
+                From cantidad_sedes AS c
+                INNER JOIN Pais AS m
+                ON c.nombre_pais = m.nombre_pais
                 """
 
 sedes_flujo = sql^consultaSQL
@@ -609,6 +602,9 @@ ax.set_title('Flujo migratorio en relación a la cantidad de sedes')
 ax.set_xlabel('Cantidad de sedes', fontsize='medium')          
 ax.set_ylabel('Flujo migratorio ', 
               fontsize='medium')
+ax.set_xlim(0.5,1.5)
+ax.set_ylim(-6000, 5000)
+
 
 #%%
 
