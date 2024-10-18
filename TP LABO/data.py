@@ -539,7 +539,9 @@ fig, ax = plt.subplots()
 plt.rcParams['font.family'] = 'sans-serif'           
 
 
-sns.barplot(data=sedesxregion, x='region_geografica', y='cant_sedes',palette="colorblind",
+colores = ['blue', "#A0C4FF", '#00FF00', '#8B4513', '#FFB3BA', '#40E0D0', '#800080', '#FF0000', '#FFF700']
+
+sns.barplot(data=sedesxregion, x='region_geografica', y='cant_sedes',palette=colores,
             legend='full',errorbar=None,edgecolor="black",linewidth=2.5)
 
 
@@ -559,13 +561,15 @@ plt.grid(True,linestyle="--",linewidth=0.5)
 
 #ii)
 
+colores = ['#40E0D0', 'blue', '#FF0000', '#8B4513', '#800080', '#FFF700','#FFB3BA','#00FF00', "#A0C4FF"]
+
 medianas = Pais.groupby('region_geografica')['flujo_mundo'].median().sort_values(ascending=False)
 
 ax = sns.boxplot(x="region_geografica", 
                  y="flujo60_00",  
                  data=Pais,
                  order = medianas.index,
-                 palette = "colorblind")
+                 palette = colores)
 
 ax.set_title('Flujo Migratorio Por Región')
 ax.set_xlabel('Región Geográfica')
