@@ -591,22 +591,17 @@ consultaSQL = """
 sedes_flujo = sql^consultaSQL
 
 
-plt.scatter(data = sedes_flujo, x='cant_sedes', y='flujo_ARG')
-fig, ax = plt.subplots() 
-plt.rcParams['font.family'] = 'sans-serif'           
-ax.scatter(data = sedes_flujo,  
-            x='cant_sedes', 
-            y='flujo_ARG',
-            s=30,      
-            color='red')
+sedes_flujo['color'] = ['red' if x == 1 else '#0d99ff' for x in sedes_flujo['cant_sedes']]
 
-ax.set_title('Flujo migratorio en relación a la cantidad de sedes')
-ax.set_xlabel('Cantidad de sedes', fontsize='medium')          
-ax.set_ylabel('Flujo migratorio ', 
-              fontsize='medium')
-ax.set_xlim(0.5,1.5)
-ax.set_ylim(-6000, 5000)
+sns.scatterplot(data=sedes_flujo, x='cant_sedes', y='flujo_ARG', hue='color', palette=['#0d99ff', 'red'], s=50, legend=False)
 
+# Personalización del gráfico
+plt.xlabel('Cantidad de sedes', fontsize='medium')
+plt.ylabel('Flujo migratorio', fontsize='medium')
+plt.title('Flujo migratorio en relación a la cantidad de sedes')
+plt.xlim(0.5,1.5)
+plt.ylim(-6000, 5000)
+plt.show()
 
 #%%
 
