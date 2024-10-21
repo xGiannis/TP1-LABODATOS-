@@ -359,7 +359,7 @@ consulta_sql = """
                
 cant_seccionesXsede = sql^consulta_sql
 
-#hay sedes que no tienen secciones, eso me esta cagando todo
+#hay sedes que no tienen secciones, debo reemplazar los nulls por 0s.
 
 consulta_sql = """
                 SELECT DISTINCT nombre_pais, sede_id, COALESCE(cant_secciones, 0) AS cant_secciones
@@ -398,12 +398,6 @@ resultado = sql^consulta_sql
 
 
 
-#hay algo raro que es que cuando hago el inner join con pais pierdo 3 paises, osea
-#hay 3 paises que no tienen datos en la tabla de migraciones que nos dieron, un ejemplo es
-#serbia. 
-
-
-
 
 #%%
 #ii)
@@ -433,6 +427,7 @@ flujoPorRegionYSedes = sql^consulta_sql
 #%%
 #iii)
 
+#Selecciono nombre del pais, sede id y red social.
 consulta_sql = """
                 SELECT DISTINCT  s.nombre_pais, s.sede_id, r.redes_sociales
                 FROM sedes AS s
@@ -443,6 +438,7 @@ consulta_sql = """
 
 paisSedesRedes = sql^consulta_sql
 
+#Armo una tabla con nombre de pais y una columna que diga que red social usa.
 consulta_sql = """
                 SELECT DISTINCT  nombre_pais, 
                                 CASE 
@@ -461,6 +457,8 @@ consulta_sql = """
 
 paisesConRedes = sql^consulta_sql
 
+#Finalmente cuento cuantas redes sociales utiliza cada país.
+
 consulta_sql = """
                 SELECT DISTINCT nombre_pais, count(nombre_pais) AS cant_redes
                 FROM paisesConRedes
@@ -473,6 +471,8 @@ cantRedesPais = sql^consulta_sql
 
 #%%
 #iv)
+
+#Seleccionamos todo de la tabla redes_sociales y sedes
 consulta_sql="""
 SELECT *
 FROM redes_sociales as r 
@@ -482,6 +482,7 @@ ON s.sede_id = r.sede_id
 
 redes_paises = sql^consulta_sql
 
+#Ahora seleccionamos el nombre del pais, la sede, a que red social pertenece el URL y el URl. 
 consulta_sql = """
                 SELECT DISTINCT  nombre_pais as Pais,sede_id as Sede, 
                                 CASE 
@@ -553,9 +554,7 @@ ax.set_ylabel('Cantidad', fontsize='medium')
 #ax.set_ylim(0, 250)
 plt.xticks(rotation=90)
 plt.grid(True,linestyle="--",linewidth=0.5)
-##ax.set_xticks(range(1,11,1))               # Muestra todos los ticks del eje x
-#ax.set_yticks([])                          # Remueve los ticks del eje y
-#ax.bar_label(ax.containers[0], fontsize=8)   # Agrega la etiqueta a cada barra
+
 
 #%%
 
@@ -611,3 +610,16 @@ plt.show()
 resultadoAbreviadoHi=resultado.head()
 
 resultadoAbreviadoHii= cantRedesPais.iloc[0:6]
+
+#%%
+
+#GQM PARA MIGRACIONES 
+
+
+consulta_sql = """
+                SELECT DISTINCT COUNT("2000 [2000]") AS cant_de_puntos
+                FROM datos_migraciones 
+                WHERE "2000 [2000]" = '..'
+               """
+
+gqm_migraciones = sql^consulta_sql
