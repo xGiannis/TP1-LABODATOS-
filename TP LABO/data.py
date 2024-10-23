@@ -60,7 +60,7 @@ consulta_sql20 = """
 datos_migraciones2 = sql^consulta_sql20
 
 
-#Tomo las inmigraciones y las emigraciones y sumo.
+#Tomo las inmigraciones y las emigraciones y resto.
     
 consulta_sql = """
                 SELECT DISTINCT "Country Origin Code" AS codigo, SUM(CAST("2000 [2000]" AS DECIMAL)) AS emigraciones00
@@ -173,9 +173,8 @@ consulta_sql = """
                """
                
 flujo_total = sql^consulta_sql 
+
 #Ahora voy a armar una tabla que tenga Codigo, Pais y region geografica
-
-
 
 consulta_sql = """
                 SELECT DISTINCT pais_iso_3, pais_castellano AS nombre_pais, region_geografica
@@ -214,72 +213,6 @@ sedes = sql^consulta_sql
 
 
 
-# %%
-# ############REDES SOCIALES ##################:
-
-#Los atributos son url. 
-
-consulta_sql = """
-                SELECT DISTINCT redes_sociales, sede_id
-                FROM datos_completos
-               """
-
-redes_sociales = sql^consulta_sql
-
-
-#vamos a splittear las redes sociales por url
-a=redes_sociales["redes_sociales"]
-b=a[2]
-
-def splitRedes(df):
-    listadelistaurls:list=[] #contiene listas de listas, algunas listas de un solo elemento y otras vacias (supongo the later)
-    redes = df["redes_sociales"]
-    for i in range(len(redes)):
-        urls = redes[i]
-        listaurl=[]
-        if urls != None:
-            listaurl=urls.split(' //')
-            listaurl.pop()  ##TODAS LAS LISTAS terminan con //, asi que saco el ultimo elemento a todas dif de null (si no, siempre qeudaba un ultimo vacio).
-        listadelistaurls.append(listaurl)
-    return listadelistaurls
- 
-
-redes_urls_separados=splitRedes(redes_sociales)
-
-def matcheoListaSede(df,listadelistas):
-    #matchea cada lista con una sede, y las hace dfs
-    
-    u1=[]
-    s1=[]
-    
-    d={"sede_id":s1,"url":u1}
-    
-    res = pd.DataFrame(data=d)
-    
-    sedes_id=df["sede_id"]
-    
-    for i in range(len(listadelistas)):
-        
-        urls = listadelistas[i]
-        id= sedes_id[i]
-        
-        repeticionId=[]
-        for j in range(len(urls)):
-            repeticionId.append(id)
-        
-        #tal vez no necesito este for!! me tengo q ir al cumple!
-            
-        datosede = {"sede_id":repeticionId,"url":urls}
-        dfsede=pd.DataFrame(data=datosede)
-        
-        res.concat(dfsede)
-    return res
-        
-        
-        
-matcheoListaSede(redes_sociales, redes_urls_separados)
-    
-
 #%%
 ###########REDES SOCIALES#################
 #Para armar la tabla de Redes Sociales hay que dividir los valores originales que hay 
@@ -312,7 +245,7 @@ redes_sociales = sql^consulta_sql
 # %%
 # ############SECCIONES ##################:
 
-#hay que hacer la tabal de secciones y también la tabla de dividida_en
+#hay que hacer la tabla de secciones y también la tabla de dividida_en
 
 consulta_sql = """
                 SELECT DISTINCT sede_desc_castellano
@@ -401,6 +334,7 @@ resultado = sql^consulta_sql
 
 #%%
 #ii)
+#Selecciono region geografica y calculo el promedio del flujo con argentina.
 consultaSQL = """
                 Select distinct region_geografica, AVG(flujo_ARG) as flujo_promedio_arg 
                 From Pais
@@ -408,12 +342,14 @@ consultaSQL = """
                 """
 regionYflujo = sql^consultaSQL
 
+#Selecciono region geografica y cuento cuantos países tienen sedes argentinas
 paisesConSedes = sql^"""
                 Select distinct region_geografica, COUNT(nombre_pais) AS paises_con_sedes
                 From Pais
                 Group by region_geografica;
                 """
-                
+
+#Con los datos conseguidos anteriormente hago los joins para obtener la tabla pedida.
 consulta_sql = """
                 SELECT r.region_geografica, p.paises_con_sedes, r.flujo_promedio_arg 
                 FROM regionYflujo AS r
@@ -562,6 +498,7 @@ plt.grid(True,linestyle="--",linewidth=0.5)
 
 colores = ['#40E0D0', 'blue', '#FF0000', '#8B4513', '#800080', '#FFF700','#FFB3BA','#00FF00', "#A0C4FF"]
 
+#esto es para poder ordenar el boxplot segun la mediana.
 medianas = Pais.groupby('region_geografica')['flujo_mundo'].median().sort_values(ascending=False)
 
 ax = sns.boxplot(x="region_geografica", 
