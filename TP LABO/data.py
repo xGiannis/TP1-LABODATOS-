@@ -532,10 +532,19 @@ sedes_flujo['color'] = ['red' if x == 1 else '#0d99ff' for x in sedes_flujo['can
 
 sns.scatterplot(data=sedes_flujo, x='cant_sedes', y='flujo_ARG', hue='color', palette=['#0d99ff', 'red'], s=50, legend=False)
 
-# Personalización del gráfico
 plt.xlabel('Cantidad de sedes', fontsize='medium')
 plt.ylabel('Flujo migratorio', fontsize='medium')
 plt.title('Flujo migratorio en relación a la cantidad de sedes')
+plt.show()
+
+#%%
+#mismo gráfico enfocado en los paises con 1 sede
+
+sns.scatterplot(data=sedes_flujo, x='cant_sedes', y='flujo_ARG', color = 'red', s=50, legend=False)
+
+plt.xlabel('Cantidad de sedes', fontsize='medium')
+plt.ylabel('Flujo migratorio', fontsize='medium')
+plt.title('Flujo migratorio en los paises con 1 sede')
 plt.xlim(0.5,1.5)
 plt.ylim(-6000, 5000)
 plt.show()
