@@ -3,8 +3,15 @@
 """
 Created on Fri Sep 20 11:33:24 2024
 
-@author: Estudiante
+Integrantes:
+Sebastian Manuel Souto,
+Gian Lucca Sanza,
+Goldfarb Bruno
+
+En el siguiente código realizamos la limpieza de los datos originales y
+la resolución de los ejercicios.
 """
+
 #%%
 # Importamos bibliotecas
 import pandas as pd
