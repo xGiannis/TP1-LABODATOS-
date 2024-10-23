@@ -6,7 +6,7 @@ Created on Fri Sep 20 11:33:24 2024
 Integrantes:
 Sebastian Manuel Souto,
 Gian Lucca Sanza,
-Goldfarb Bruno
+Goldfarb Bruno.
 
 En el siguiente código realizamos la limpieza de los datos originales y
 la resolución de los ejercicios.
@@ -14,6 +14,8 @@ la resolución de los ejercicios.
 
 #%%
 # Importamos bibliotecas
+import os
+from pathlib import Path
 import pandas as pd
 from inline_sql import sql, sql_val
 import numpy as np
@@ -21,14 +23,18 @@ import matplotlib.pyplot as plt # Para graficar series multiples
 from   matplotlib import ticker   # Para agregar separador de miles
 import seaborn as sns           # Para graficar histograma
 
-#C:\Users\usuario\Desktop\TP1-LABODATOS-\TP LABO\lista-sedes-basicos.csv
-#gian:
-#miprefijo="C:/Users/usuario/Desktop/TP1-LABODATOS-/TP LABO/" 
 
-#seba:
-miprefijo = "C:\\Users\\Sebastián\\Desktop\\TP1-LABODATOS-\\TP LABO\\" 
+# Cambiar el directorio de trabajo al del archivo actual
+ruta_base = Path(__file__).parent
+
+os.chdir(ruta_base)
+
+
 
 archivo_completo=  "lista-sedes-completos.csv"
+
+#Este archivo es archivo_completo pero solucionando el error que tenia una fila que no nos permitia
+#visualizarla (Republica de Chile).
 
 archivo_completo_copia=  "lista-sedes-completos - copia.csv"
 
@@ -38,13 +44,13 @@ archivo_secciones= "lista-secciones.csv"
 
 archivo_migraciones = "datos_migraciones.csv"
 
-datos_basicos= pd.read_csv(miprefijo+archivo_basico)
+datos_basicos= pd.read_csv(archivo_basico)
 
-datos_secciones = pd.read_csv(miprefijo+archivo_secciones)
+datos_secciones = pd.read_csv(archivo_secciones)
 
-datos_completos= pd.read_csv(miprefijo+archivo_completo_copia)
+datos_completos= pd.read_csv(archivo_completo_copia)
 
-datos_migraciones = pd.read_csv(miprefijo+archivo_migraciones)
+datos_migraciones = pd.read_csv(archivo_migraciones)
 
 
 
@@ -233,6 +239,9 @@ consulta_sql = """
 
 redes_sociales0 = sql^consulta_sql
 
+
+#Aca separamos el texto de las celdad de redes sociales con "//", ya que ese es el formato en
+#el csv para dividir cada red social de cada sede.
 redes_sociales0['redes_sociales'] = redes_sociales0['redes_sociales'].str.split(' // ')
 
 redes_sociales01 = redes_sociales0.explode('redes_sociales').reset_index(drop=True)
@@ -426,6 +435,7 @@ ON s.sede_id = r.sede_id
 redes_paises = sql^consulta_sql
 
 #Ahora seleccionamos el nombre del pais, la sede, a que red social pertenece el URL y el URl. 
+#Tal vez hay alguna mejor forma de hacer esto
 consulta_sql = """
                 SELECT DISTINCT  nombre_pais as Pais,sede_id as Sede, 
                                 CASE 
@@ -455,17 +465,7 @@ redesxpaisurl=sql^consulta_sql
 
 
 #i)
-#cntd sdes por region geografica:
-    
-sedesxregion=sql^"""
-SELECT SUM(cs.cant_sedes) as cant_sedes, region_geografica
-FROM cantidad_sedes as cs
-INNER JOIN info_pais as ip
-ON cs.nombre_pais = ip.nombre_pais
-GROUP BY region_geografica
-ORDER BY cant_sedes
-"""
-#replico esto solo usando usando las entidades
+#cantidad de sedes por region geografica:
 sedesxregionbien=sql^"""
 SELECT COUNT(s.nombre_pais) as cant_sedes, region_geografica
 FROM sedes as s
@@ -482,10 +482,10 @@ fig, ax = plt.subplots()
 
 plt.rcParams['font.family'] = 'sans-serif'           
 
-
+#Usamos unos colores seleccionados manualmente para ser constante con cada región.
 colores = ['blue', "#A0C4FF", '#00FF00', '#8B4513', '#FFB3BA', '#40E0D0', '#800080', '#FF0000', '#FFF700']
 
-sns.barplot(data=sedesxregion, x='region_geografica', y='cant_sedes',palette=colores,
+sns.barplot(data=sedesxregionbien, x='region_geografica', y='cant_sedes',palette=colores,
             legend='full',errorbar=None,edgecolor="black",linewidth=2.5)
 
 
@@ -534,7 +534,7 @@ consultaSQL = """
 
 sedes_flujo = sql^consultaSQL
 
-
+#Aca remarcamos la sección de la izquieda donde se juntan los puntos:
 sedes_flujo['color'] = ['red' if x == 1 else '#0d99ff' for x in sedes_flujo['cant_sedes']]
 
 sns.scatterplot(data=sedes_flujo, x='cant_sedes', y='flujo_ARG', hue='color', palette=['#0d99ff', 'red'], s=50, legend=False)
