@@ -29,6 +29,7 @@ ruta_base = Path(__file__).parent
 
 os.chdir(ruta_base)
 
+miprefijo="TablasLimpias/"
 
 
 archivo_completo=  "lista-sedes-completos.csv"
