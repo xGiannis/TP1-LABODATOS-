@@ -72,8 +72,20 @@ consulta_sql20 = """
 
 
 datos_migraciones2 = sql^consulta_sql20
+#%%
+#CON ESTA CONSULTA SOLUCIONAMOS EL ERROR DE SUMAR TODO DOS VECES Y SACAMOS LAS FILAS DE ..
+
+consulta_sql20 = """
+                  SELECT *
+                  FROM datos_migraciones
+                  WHERE "Migration by Gender Name" == 'Total' AND "2000 [2000]" != '..' ;
+                 """
+
+datos_migraciones2 = sql^consulta_sql20
 
 
+
+#%%
 #Tomo las inmigraciones y las emigraciones y resto.
     
 consulta_sql = """
