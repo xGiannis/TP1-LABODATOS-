@@ -60,19 +60,8 @@ datos_migraciones = pd.read_csv(archivo_migraciones)
 
 ############PAIS#############:
 
-#Primero cambio los valores de flujo donde hay '..' por '0'.
-                
-consulta_sql20 = """
-                  SELECT "Country Origin Name", "Country Origin Code",
-                         "Migration by Gender Name", "Migration by Gender Code",
-                         "Country Dest Name", "Country Dest Code", REPLACE ("1960 [1960]", '..', '0') AS "1960 [1960]" , REPLACE ("1970 [1970]", '..', '0') AS "1970 [1970]",
-                         REPLACE("1980 [1980]",'..','0') AS "1980 [1980]", REPLACE("1990 [1990]",'..','0') AS "1990 [1990]", REPLACE ("2000 [2000]", '..', '0') AS "2000 [2000]"
-                  FROM datos_migraciones;
-                 """
 
-
-datos_migraciones2 = sql^consulta_sql20
-#%%
+               
 #CON ESTA CONSULTA SOLUCIONAMOS EL ERROR DE SUMAR TODO DOS VECES Y SACAMOS LAS FILAS DE ..
 
 consulta_sql20 = """
@@ -85,7 +74,7 @@ datos_migraciones2 = sql^consulta_sql20
 
 
 
-#%%
+
 #Tomo las inmigraciones y las emigraciones y resto.
     
 consulta_sql = """
@@ -260,7 +249,7 @@ redes_sociales0['redes_sociales'] = redes_sociales0['redes_sociales'].str.split(
 redes_sociales01 = redes_sociales0.explode('redes_sociales').reset_index(drop=True)
 
 consulta_sql = """
-                SELECT DISTINCT sede_id, redes_sociales
+                SELECT DISTINCT sede_id, redes_sociales AS URL
                 FROM redes_sociales01
                 WHERE redes_sociales IS NOT NULL 
                     AND TRIM(redes_sociales) != '';
@@ -268,6 +257,24 @@ consulta_sql = """
 
 redes_sociales = sql^consulta_sql
 
+#quiero agregar a red social un atributo que sea tipo de red.
+
+consulta_sql = """
+                SELECT DISTINCT  sede_id, URL, 
+                                CASE 
+                                    WHEN URL LIKE '%facebook%' THEN 'facebook'
+                                    WHEN URL LIKE '%instagram%' THEN 'instagram'
+                                    WHEN URL LIKE '%twitter%' THEN 'twitter'
+                                    WHEN URL LIKE '%linkedin%' THEN 'linkedin'
+                                    WHEN URL LIKE '%flickr%' THEN 'flickr'
+                                    WHEN URL LIKE '%youtube%' THEN 'youtube'
+                                    WHEN URL LIKE '%gmail%' THEN 'gmail'
+                                    ELSE 'desconocida'
+                                END AS tipo_red
+                FROM redes_sociales;
+               """
+ 
+redes_sociales = sql^consulta_sql
 
 
 
@@ -394,7 +401,7 @@ flujoPorRegionYSedes = sql^consulta_sql
 
 #Selecciono nombre del pais, sede id y red social.
 consulta_sql = """
-                SELECT DISTINCT  s.nombre_pais, s.sede_id, r.redes_sociales
+                SELECT DISTINCT  s.nombre_pais, r.tipo_red
                 FROM sedes AS s
                 INNER JOIN  redes_sociales AS r
                 ON s.sede_id = r.sede_id
@@ -403,31 +410,11 @@ consulta_sql = """
 
 paisSedesRedes = sql^consulta_sql
 
-#Armo una tabla con nombre de pais y una columna que diga que red social usa.
-consulta_sql = """
-                SELECT DISTINCT  nombre_pais, 
-                                CASE 
-                                    WHEN redes_sociales LIKE '%facebook%' THEN 'facebook'
-                                    WHEN redes_sociales LIKE '%instagram%' THEN 'instagram'
-                                    WHEN redes_sociales LIKE '%twitter%' THEN 'twitter'
-                                    WHEN redes_sociales LIKE '%linkedin%' THEN 'linkedin'
-                                    WHEN redes_sociales LIKE '%flickr%' THEN 'flickr'
-                                    WHEN redes_sociales LIKE '%youtube%' THEN 'youtube'
-                                    WHEN redes_sociales LIKE '%gmail%' THEN 'gmail'
-                                    ELSE 'desconocida'
-                                END AS red_social
-                FROM paisSedesRedes
-                ORDER BY nombre_pais ASC;
-               """
-
-paisesConRedes = sql^consulta_sql
-
-#Finalmente cuento cuantas redes sociales utiliza cada país.
 
 consulta_sql = """
                 SELECT DISTINCT nombre_pais, count(nombre_pais) AS cant_redes
-                FROM paisesConRedes
-                WHERE red_social != 'desconocida'
+                FROM paisSedesRedes
+                WHERE tipo_red != 'desconocida'
                 GROUP BY nombre_pais
                 ORDER BY nombre_pais ASC;
                """
@@ -437,37 +424,14 @@ cantRedesPais = sql^consulta_sql
 #%%
 #iv)
 
-#Seleccionamos todo de la tabla redes_sociales y sedes
 consulta_sql="""
-SELECT *
+SELECT s.nombre_pais, s.sede_id, r.tipo_red, r.URL
 FROM redes_sociales as r 
 INNER JOIN sedes as s
 ON s.sede_id = r.sede_id
 """
 
 redes_paises = sql^consulta_sql
-
-#Ahora seleccionamos el nombre del pais, la sede, a que red social pertenece el URL y el URl. 
-#Tal vez hay alguna mejor forma de hacer esto
-consulta_sql = """
-                SELECT DISTINCT  nombre_pais as Pais,sede_id as Sede, 
-                                CASE 
-                                    WHEN redes_sociales LIKE '%facebook%' THEN 'Facebook'
-                                    WHEN redes_sociales LIKE '%instagram%' THEN 'Instagram'
-                                    WHEN redes_sociales LIKE '%twitter%' THEN 'Twitter'
-                                    WHEN redes_sociales LIKE '%linkedin%' THEN 'Linkedin'
-                                    WHEN redes_sociales LIKE '%flickr%' THEN 'Flickr'
-                                    WHEN redes_sociales LIKE '%youtube%' THEN 'Youtube'
-                                    WHEN redes_sociales LIKE '%gmail%' THEN 'Gmail'
-                                    ELSE 'desconocida'
-                                END AS red_social,
-                                redes_sociales as URL
-                FROM redes_paises
-                ORDER BY nombre_pais ASC;
-               """
-
-
-redesxpaisurl=sql^consulta_sql
 
 
 #%% 
