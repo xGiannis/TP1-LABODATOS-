@@ -524,13 +524,20 @@ plt.show()
 #%%
 #mismo gráfico enfocado en los paises con 1 sede
 
-sns.scatterplot(data=sedes_flujo, x='cant_sedes', y='flujo_ARG', color = 'red', s=50, legend=False)
+jitter_strength = 0.3
 
-plt.xlabel('Cantidad de sedes', fontsize='medium')
+sns.scatterplot(x=sedes_flujo['cant_sedes'] + np.random.uniform(-jitter_strength, jitter_strength, size=len(sedes_flujo)), 
+    y=sedes_flujo['flujo_ARG'],
+    color='red', 
+    s=50, 
+    legend=False)
+
+plt.xlabel('', fontsize='medium')
 plt.ylabel('Flujo migratorio', fontsize='medium')
-plt.title('Flujo migratorio en los paises con 1 sede')
-plt.xlim(0.5,1.5)
+plt.title('Flujo migratorio en los países con 1 sede')
+plt.xlim(0.5, 1.5)
 plt.ylim(-6000, 5000)
+plt.xticks([])
 plt.show()
 
 #%%
