@@ -1,10 +1,3 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Wed Nov  6 10:25:40 2024
-
-@author: Sebastián
-"""
-
 #%%
 # Importamos bibliotecas
 import os
@@ -411,7 +404,7 @@ avg_secciones = sql^consulta_sql
 #Finalmente los joins de las tablas que hice para obtener el resultado.
 
 consulta_sql = """
-                SELECT DISTINCT cs.nombre_pais, cs.cant_sedes, a.secciones_promedio, p.flujo_mundo
+                SELECT DISTINCT cs.nombre_pais, cs.cant_sedes, a.secciones_promedio, p.flujo_mundo as flujo_mundo_2000
                 FROM cantidad_sedes AS cs
                 INNER JOIN avg_secciones AS a
                 ON cs.nombre_pais = a.nombre_pais
@@ -442,7 +435,7 @@ paisesConSedes = sql^"""
 
 #Con los datos conseguidos anteriormente hago los joins para obtener la tabla pedida.
 consulta_sql = """
-                SELECT r.region_geografica, p.paises_con_sedes, r.flujo_promedio_arg 
+                SELECT r.region_geografica, p.paises_con_sedes, r.flujo_promedio_arg as flujo_promedio_arg_2000
                 FROM regionYflujo AS r
                 INNER JOIN paisesConSedes AS p
                 ON r.region_geografica = p.region_geografica
