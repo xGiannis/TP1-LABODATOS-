@@ -476,21 +476,80 @@ plt.xticks(rotation=90)
 plt.grid(True,linestyle="--",linewidth=0.5)
 
 
+#%%
+#Hago un flujo_ARG_promedio de todos los tiempos
+#Todas las emigraciones de argentina por década
+consulta_sql = """
+                SELECT "Country Dest Code" AS destino, 
+                       SUM(CAST("1960 [1960]" AS DECIMAL)) AS emigraciones60,
+                       SUM(CAST("1970 [1970]" AS DECIMAL)) AS emigraciones70,
+                       SUM(CAST("1980 [1980]" AS DECIMAL)) AS emigraciones80,
+                       SUM(CAST("1990 [1990]" AS DECIMAL)) AS emigraciones90,
+                       SUM(CAST("2000 [2000]" AS DECIMAL)) AS emigraciones00
+                FROM datos_migraciones2
+                WHERE "Country Origin Code" = 'ARG'
+                GROUP BY "Country Dest Code";
+               """
+emigraciones_ARG = sql^consulta_sql
 
+#Inmigraciones a Argentina por década
+consulta_sql = """
+                SELECT "Country Origin Code" AS origen, 
+                       SUM(CAST("1960 [1960]" AS DECIMAL)) AS inmigraciones60,
+                       SUM(CAST("1970 [1970]" AS DECIMAL)) AS inmigraciones70,
+                       SUM(CAST("1980 [1980]" AS DECIMAL)) AS inmigraciones80,
+                       SUM(CAST("1990 [1990]" AS DECIMAL)) AS inmigraciones90,
+                       SUM(CAST("2000 [2000]" AS DECIMAL)) AS inmigraciones00
+                FROM datos_migraciones2
+                WHERE "Country Dest Code" = 'ARG'
+                GROUP BY "Country Origin Code";
+               """
+inmigraciones_ARG = sql^consulta_sql
+
+
+#flujo de migración por década
+consulta_sql = """
+                SELECT i.origen AS codigo,
+                       (AVG(i.inmigraciones60) - AVG(e.emigraciones60)) AS flujo60,
+                       (AVG(i.inmigraciones70) - AVG(e.emigraciones70)) AS flujo70,
+                       (AVG(i.inmigraciones80) - AVG(e.emigraciones80)) AS flujo80,
+                       (AVG(i.inmigraciones90) - AVG(e.emigraciones90)) AS flujo90,
+                       (AVG(i.inmigraciones00) - AVG(e.emigraciones00)) AS flujo00
+                FROM inmigraciones_ARG AS i
+                INNER JOIN emigraciones_ARG AS e
+                ON i.origen = e.destino
+                GROUP BY i.origen;
+               """
+flujo_ARG_por_decada = sql^consulta_sql
+
+consulta_sql = """
+                Select codigo, (flujo60 + flujo70 + flujo80 + flujo90 + flujo00) / 5 AS flujo_promedio
+                From flujo_ARG_por_decada
+                """
+flujo_ARG_promedio = sql^consulta_sql
+
+consulta_sql = """
+                SELECT m.region_geografica, f.flujo_promedio AS flujo_ARG
+                FROM flujo_ARG_promedio AS f
+                INNER JOIN datos_completos AS m 
+                ON f.codigo = m.pais_iso_3
+                """
+flujo_promedio_por_region = sql^consulta_sql
 #%%
 
 #ii)
 
-colores = ['#40E0D0', 'blue', '#FF0000', '#8B4513', '#800080', '#FFF700','#FFB3BA','#00FF00', "#A0C4FF"]
+data = flujo_promedio_por_region
+colores = ['#FFF700', '#FF0000', '#00FF00', '#800080', '#A0C4FF', '#8B4513','#FFB3BA','blue', "#40E0D0"]
 
-#esto es para poder ordenar el boxplot segun la mediana.
-medianas = Pais.groupby('region_geografica')['flujo_mundo'].median().sort_values(ascending=False)
+# #esto es para poder ordenar el boxplot segun la mediana.
+medianas = data.groupby('region_geografica')['flujo_ARG'].median().sort_values(ascending=False)
 
 ax = sns.boxplot(x="region_geografica", 
-                 y="flujo60_00",  
-                 data=Pais,
-                 order = medianas.index,
-                 palette = colores)
+                  y="flujo_ARG",  
+                  data=data,
+                  order = medianas.index,
+                  palette = colores)
 
 ax.set_title('Flujo Migratorio Por Región')
 ax.set_xlabel('Región Geográfica')
@@ -498,7 +557,6 @@ ax.set_ylabel('Flujo Migratorio')
 
 plt.xticks(rotation=90)
 plt.grid(True,linestyle="--",linewidth=0.5)
-
 
 #%%
 #iii)
